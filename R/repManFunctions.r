@@ -307,7 +307,8 @@ runExperiment=function(files,
                        outputFile = "output.xlsx",
                        saveToFile = T, permute = FALSE)
 {
-
+  
+  cat("started ...\n")
   #### start algorithm read data
   #### start algorithm read data
   inputData = readMergeSave(files, filenames = NULL)
@@ -430,6 +431,7 @@ runExperiment=function(files,
   {
     saveResults(tablesToXls, outputFile = outputFile)
   }
+  cat("return with profiling information\n")
   return(tablesToXls)
 }
 
