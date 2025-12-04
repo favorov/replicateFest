@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"editor.inlineSuggest.enabled": false,
+		"editor.tabCompletion": "on",
+		"editor.quickSuggestions": {
+  			"other": "off"
+		},
+		"accessibility.signalOptions.volume": 0
+	}
+}
