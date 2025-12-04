@@ -29,6 +29,6 @@ res = runExperiment(files,
                     saveToFile = F)
 
 # save results to be used during package tests in testthat
-saveRDS(res, file = paste0(inputDir, "replicate_results.rds"))
+#saveRDS(res, file = paste0(inputDir, "replicate_results.rds"))
 
 

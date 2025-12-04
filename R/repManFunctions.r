@@ -543,7 +543,7 @@ fitModelSet = function(clones, countData, peptides,
 #' @param orThr threshold for OR to consider a clone expanded
 #' @param fdrThr threshold for FDR to consider a clone expanded
 #' @return a data frame with expanded clones
-#'
+#' @export
 # input: a data frame with ORs, p-values and FDRs
 # output: a data frame with expanded clones
 getExpanded = function(fitResults, countData,

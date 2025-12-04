@@ -466,6 +466,8 @@ server <- function(input, output,session) {
   observeEvent(input$replicates, {
     # if the checkbox is selected
     if (input$replicates == TRUE){
+      # make compareToRef checked before disabling
+      updateCheckboxInput(session, "compareToRef", value = TRUE)
     # disable the Compare to reference option and condition threshold
       shinyjs::disable('compareToRef')
       # and enable
@@ -504,6 +506,9 @@ server <- function(input, output,session) {
           updateSelectInput(session, "excludeSamp", choices=sampAnnot$condition)
 
         }
+        # make compareToRef checked before disabling
+        updateCheckboxInput(session, "compareToRef", value = TRUE)
+        # and disable
         shinyjs::disable('compareToRef')
 
       # if The input with replicates is unchecked
