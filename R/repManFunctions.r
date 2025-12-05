@@ -469,17 +469,29 @@ getAbundances = function(clones,countData)
 getClonesToTest = function(countDat, nReads = 50)
 {
   # all clones
-  clones=unlist(sapply(countDat,function(x)  return(names(x))))
-  # the corresponding counts
-  cts=unlist(sapply(countDat,function(x)  return(x)))
-  #
-  maxCt=tapply(cts,clones,max)
-
+  # clones = unlist(sapply(countDat,function(x)  return(names(x))))
+  # # the corresponding counts
+  # cts = unlist(sapply(countDat, function(x)  return(x)))
+  # # get maximum count for each clone across all samples
+  # maxCt = tapply(cts, clones, max)
+  
+  # alternative faster implementation
+  # create a data.table with all sampples, clones, and counts
+  library(data.table)
+  dt_list = lapply(names(countDat), function(samp){
+    data.table(clone = names(countDat[[samp]]),
+               count = as.numeric(countDat[[samp]]),
+               sample = samp)
+  })
+  dt = rbindlist(dt_list)
+  # get maximum count for each clone across all samples
+  maxCt = dt[, .(max_count = max(count)), by = clone]
+  maxCt = setNames(maxCt$max_count, maxCt$clone)
   # clones that have more than nReads reads to run the analysis
-  goodClones=names(maxCt)[which(maxCt>nReads)]
+  goodClones = names(maxCt)[which(maxCt>nReads)]
 
   return(goodClones)
-}
+}  
 
 #' fit model for a set of clones
 #' @param clones a list of clones to fit the model
