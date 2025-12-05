@@ -5,7 +5,7 @@
 \title{cTabPR
 function to make the count matrix for 1 clone, from merged data}
 \usage{
-cTabPR(clone, countData, correct = 0.5)
+cTabPR(clone, countData, correct = 1)
 }
 \arguments{
 \item{clone}{a clone to get counts for}
