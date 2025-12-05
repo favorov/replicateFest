@@ -82,19 +82,42 @@ readMergeSave = function(files, filenames = NULL)
 #### requires 1 input:
 ###### 1) countData=merged data from readMergeSave
 #### correct is a parameter to add to all counts to avoid 0s
-cTabPR=function(clone,countData,correct=.5){
-    # replace missing values with 0
-     minna=function(x){  ### function to deal with missing values
-        if(is.na(x)) x=0
-        return(x)}
-    # get counts for a clone across all samples
-     cts=sapply(countData,function(x) return(x[clone]))
-     # replace missing values with 0
-     cts=sapply(cts,minna)
-     # get total read count for each sample minus the count for the clone
-     sms=sapply(countData,sum)-cts
-     ans=cbind(cts,sms)+correct
-     return(ans)
+cTabPR = function(clone, countData, correct = 1){
+
+    # # replace missing values with 0
+    #  minna=function(x){  ### function to deal with missing values
+    #     if(is.na(x)) x=0
+    #     return(x)}
+    #
+    # # get counts for a clone across all samples
+    #  cts=sapply(countDat,function(x) return(x[clone]))
+    #
+    #  # replace missing values with 0
+    #  cts=sapply(cts,minna)
+    #
+    #  # get total read count for each sample minus the count for the clone
+    #  sms=sapply(countDat,sum)-cts
+    #  ans=cbind(cts,sms)+correct
+    #
+    # alternative implementation
+    dt_list = lapply(names(countData), function(samp){
+      list(cts = as.numeric(countData[[samp]][clone]),
+                 sample = samp,
+                 total = sum(countData[[samp]]))
+    })
+    # convert to table
+    dt = rbindlist(dt_list)
+    # replace NA with 0
+    dt[is.na(cts), cts := 0]
+    # read count for each sample minus the count for the clone
+    dt[, sms := total - cts + correct]
+    # add correction to counts to avoid 0
+    dt[ , cts := cts + correct]
+    #prepare ans as data.frame as we used in revious version
+    ans <- cbind(dt[[1]],dt[[4]])
+    colnames(ans) <- c("cts","sms")
+    rownames(ans) <- dt[[2]]
+    return(ans)
 }
 
 #### function to make the data frame for regression
@@ -478,7 +501,6 @@ getClonesToTest = function(countDat, nReads = 50)
   
   # alternative faster implementation
   # create a data.table with all sampples, clones, and counts
-  library(data.table)
   dt_list = lapply(names(countDat), function(samp){
     data.table(clone = names(countDat[[samp]]),
                count = as.numeric(countDat[[samp]]),
