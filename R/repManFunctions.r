@@ -307,134 +307,129 @@ runExperiment=function(files,
                        outputFile = "output.xlsx",
                        saveToFile = T, permute = FALSE)
 {
-  
-  cat("started ...\n")
+
+  #### start algorithm read data
+  #### start algorithm read data
+  inputData = readMergeSave(files, filenames = NULL)
+  # extract aa or nt level data for the downstream analysis
+  if (ntLevel) mergedData = inputData$ntData else mergedData = inputData$mergedData
+
+  # permute sample labels in mergedData to run permutation test
+  if (permute){
+    set.seed(123456)
+    # create sampling
+    s = sample(1:length(mergedData),size = length(mergedData), replace = F)
+    # update sample names
+    names(mergedData) = names(mergedData)[s]
+    # update peptides
+    peptides = peptides[s]
+  }
+
+  # get clones to test
+  goodClones = getClonesToTest(mergedData, nReads = nReads)
+  print(c("good clones #",length(goodClones)))
+
+  if(length(goodClones) == 0)
+  {
+    print("There are not clones to analyze. Try to reduce the number of tempaltes.")
+    return(NULL)
+  }
+#browser()
+  # run the analysis for selected clones
+  fitResults = fitModelSet(goodClones,
+                           mergedData,
+                           peptides,
+                           excludeCond = excludeCond,
+                           refSamp=refSamp,c.corr=1)
+  rownames(fitResults) = fitResults$clone
+
+
+  # get positive (uniquely expanded) clones
+  posClones = getPositiveClonesReplicates(fitResults,
+                                          mergedData,
+                                          refSamp = refSamp,
+                                          excludeCond = excludeCond,
+                                          orThr = orThr,
+                                          fdrThr = fdrThr,
+                                          percentThr = percentThr)
   tablesToXls = list()
-  #### start algorithm read data
-  #### start algorithm read data
-  profiling<-profvis::profvis({
-    inputData = readMergeSave(files, filenames = NULL)
-    # extract aa or nt level data for the downstream analysis
-    if (ntLevel) mergedData = inputData$ntData else mergedData = inputData$mergedData
+  # if there is no positive clones
+  if (nrow(posClones)==0)
+  {
+    print('There are no positive clones. Try to adjust thresholds')
+    tablesToXls$summary = data.frame('There are no positive clones', row.names = NULL, check.names = F)
+  }else{
+    # if there are positive clones, save them in to Excel file
+  # create table with results
+#    browser()
+  tablesToXls = createPosClonesOutput(posClones,
+                                      mergedData,
+                                      refSamp,
+                                      replicates = TRUE)
 
-    # permute sample labels in mergedData to run permutation test
-    if (permute){
-      set.seed(123456)
-      # create sampling
-      s = sample(1:length(mergedData),size = length(mergedData), replace = F)
-      # update sample names
-      names(mergedData) = names(mergedData)[s]
-      # update peptides
-      peptides = peptides[s]
-    }
+  }
 
-    # get clones to test
-    goodClones = getClonesToTest(mergedData, nReads = nReads)
-    print(c("good clones #",length(goodClones)))
+  resTable = createResTableReplicates(fitResults,
+                                      mergedData,
+                                      percentThr,
+                                      refSamp,
+                                      orThr,
+                                      fdrThr)
+  # if there are clones
+  if(nrow(resTable) > 0)
+  {
+    tablesToXls$ref_comparison_only = resTable
+  }else{
+    tablesToXls$ref_comparison_only =
+      data.frame(res = 'There are no significant clones')
+  }
 
-    if(length(goodClones) == 0)
-    {
-      print("There are not clones to analyze. Try to reduce the number of tempaltes.")
-      return(NULL)
-    }
-    #browser()
-    # run the analysis for selected clones
-    fitResults = fitModelSet(goodClones,
-                             mergedData,
-                             peptides,
-                             excludeCond = excludeCond,
-                             refSamp=refSamp,c.corr=1)
-    rownames(fitResults) = fitResults$clone
+  # add a spreadsheet with cross-reactive clones if specified
+  if(!is.null(xrCond))
+  {
+    tablesToXls$cross_reactive = getXR(fitResults,
+                                       peptides,
+                                       refSamp,
+                                       xrCond = xrCond,
+                                       excludeCond = excludeCond,
+                                       percentThr = percentThr,
+                                       countData = mergedData,
+                                       orThr = orThr,
+                                       fdrThr = fdrThr)
 
-
-    # get positive (uniquely expanded) clones
-    posClones = getPositiveClonesReplicates(fitResults,
-                                            mergedData,
-                                            refSamp = refSamp,
-                                            excludeCond = excludeCond,
-                                            orThr = orThr,
-                                            fdrThr = fdrThr,
-                                            percentThr = percentThr)
-    # if there is no positive clones
-    if (nrow(posClones)==0)
-    {
-      print('There are no positive clones. Try to adjust thresholds')
-      tablesToXls$summary = data.frame('There are no positive clones', row.names = NULL, check.names = F)
-    }else{
-      # if there are positive clones, save them in to Excel file
-    # create table with results
-  #    browser()
-    tablesToXls = createPosClonesOutput(posClones,
-                                        mergedData,
-                                        refSamp,
-                                        replicates = TRUE)
-
-    }
-
-    resTable = createResTableReplicates(fitResults,
-                                        mergedData,
-                                        percentThr,
-                                        refSamp,
-                                        orThr,
-                                        fdrThr)
-    # if there are clones
-    if(nrow(resTable) > 0)
-    {
-      tablesToXls$ref_comparison_only = resTable
-    }else{
-      tablesToXls$ref_comparison_only =
-        data.frame(res = 'There are no significant clones')
-    }
-
-    # add a spreadsheet with cross-reactive clones if specified
-    if(!is.null(xrCond))
-    {
-      tablesToXls$cross_reactive = getXR(fitResults,
-                                         peptides,
-                                         refSamp,
-                                         xrCond = xrCond,
-                                         excludeCond = excludeCond,
-                                         percentThr = percentThr,
-                                         countData = mergedData,
-                                         orThr = orThr,
-                                         fdrThr = fdrThr)
-
-    }
+  }
 
 
-    # save parameters of analysis
-    s = names(mergedData)
-    productiveReadCounts = sapply(mergedData, sum)
-    param = c("Data with replicates",
-              'Reference condition',
-              'Excluded conditions',
-              'Cross-reactive conditions',
-              'n template threshold','FDR threshold',
-              'OR threshold','percent threshold',
-              'Nucleotide level analysis',
-              'n samples',
-              paste(s, 'n templates',sep = '_'))
-    value = c(TRUE,
-              refSamp,
-              paste(excludeCond, collapse = ', '),
-              paste(xrCond, collapse = ', '),
-              nReads,
-              fdrThr,
-              orThr,
-              percentThr,
-              ntLevel,
-              length(s), productiveReadCounts[s])
+  # save parameters of analysis
+  s = names(mergedData)
+  productiveReadCounts = sapply(mergedData, sum)
+  param = c("Data with replicates",
+            'Reference condition',
+            'Excluded conditions',
+            'Cross-reactive conditions',
+            'n template threshold','FDR threshold',
+            'OR threshold','percent threshold',
+            'Nucleotide level analysis',
+            'n samples',
+            paste(s, 'n templates',sep = '_'))
+  value = c(TRUE,
+            refSamp,
+            paste(excludeCond, collapse = ', '),
+            paste(xrCond, collapse = ', '),
+            nReads,
+            fdrThr,
+            orThr,
+            percentThr,
+            ntLevel,
+            length(s), productiveReadCounts[s])
 
-    tablesToXls$parameters = data.frame(param, value)
+  tablesToXls$parameters = data.frame(param, value)
 
-    # save into Excel file
-    if(saveToFile)
-    {
-      saveResults(tablesToXls, outputFile = outputFile)
-    }
-  })
-  cat("return with profiling information\n")
-  tablesToXls$profiling <- profiling
+  # save into Excel file
+  if(saveToFile)
+  {
+    saveResults(tablesToXls, outputFile = outputFile)
+  }
   return(tablesToXls)
 }
 
