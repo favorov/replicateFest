@@ -4,6 +4,10 @@
 # run replicateFest on the previously published HIV data
 # https://www.frontiersin.org/journals/immunology/articles/10.3389/fimmu.2020.00591/full
 #================================================================
+if("package:replicateFest" %in% search()) {
+    detach("package:replicateFest", unload=TRUE)
+}
+#to reload
 library(replicateFest)
 library(profvis)
 #=============
@@ -49,4 +53,4 @@ profiling <- profvis({
 
     saveResults(resToExcel, "text.xlsx")
 })
-htmlwidgets::saveWidget(profiling,"profile_on_Blankson_data.html")
+htmlwidgets::saveWidget(profiling,"profile_on_Blankson_data_dt_simple.html")
