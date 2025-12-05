@@ -53,4 +53,4 @@ profiling <- profvis({
 
     saveResults(resToExcel, "text.xlsx")
 })
-htmlwidgets::saveWidget(profiling,"profile_on_Blankson_data_dt_simple.html")
+htmlwidgets::saveWidget(profiling,"profile_on_Blankson_data.html")
