@@ -11,6 +11,7 @@
 #' @importFrom multcomp glht
 #' @importFrom stats p.adjust setNames
 #' @importFrom pheatmap pheatmap
+#' @importFrom data.table data.table rbindlist
 
 #' @export
 #' @param files a list of filenames with full paths
@@ -483,7 +484,7 @@ getClonesToTest = function(countDat, nReads = 50)
                count = as.numeric(countDat[[samp]]),
                sample = samp)
   })
-  dt = rbindlist(dt_list)
+  dt <- rbindlist(dt_list)
   # get maximum count for each clone across all samples
   maxCt = dt[, .(max_count = max(count)), by = clone]
   maxCt = setNames(maxCt$max_count, maxCt$clone)
