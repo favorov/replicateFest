@@ -18,7 +18,7 @@ fdrThr = .05
 percentThr = 0
 refSamp = "NoPep"
 
-profile <- profvis({
+profiling <- profvis({
     # get clones to test
     clonesToTest = getClonesToTest(mergedData, nReads = 50)
     # run the analysis for selected clones
@@ -49,3 +49,4 @@ profile <- profvis({
 
     saveResults(resToExcel, "text.xlsx")
 })
+htmlwidgets::saveWidget(profiling,"profile_on_Blankson_data.html")
