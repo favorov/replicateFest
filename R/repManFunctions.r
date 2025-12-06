@@ -100,11 +100,16 @@ cTabPR = function(clone, countData, correct = 1){
     #  ans=cbind(cts,sms)+correct
     #
     # alternative implementation
-    dt_list = lapply(names(countData), function(samp){
+    res <- map(countData,\(sc){
+      c(cts = as.numeric(sc[clone])+correct,
+      sms=sum(sc)+correct)
+    })
+    
+    lapply(names(countData), function(samp){
       list(cts = as.numeric(countData[[samp]][clone]),
-                 sample = samp,
                  total = sum(countData[[samp]]))
     })
+
     # convert to table
     dt = rbindlist(dt_list)
     # replace NA with 0
