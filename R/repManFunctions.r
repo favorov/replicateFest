@@ -12,6 +12,7 @@
 #' @importFrom stats p.adjust setNames
 #' @importFrom pheatmap pheatmap
 #' @importFrom data.table data.table rbindlist
+#' @importFrom purrr map list_rbind
 
 #' @export
 #' @param files a list of filenames with full paths
@@ -100,29 +101,17 @@ cTabPR = function(clone, countData, correct = 1){
     #  ans=cbind(cts,sms)+correct
     #
     # alternative implementation
-    res <- map(countData,\(sc){
-      c(cts = as.numeric(sc[clone])+correct,
-      sms=sum(sc)+correct)
-    })
-    
-    lapply(names(countData), function(samp){
-      list(cts = as.numeric(countData[[samp]][clone]),
-                 total = sum(countData[[samp]]))
-    })
-
-    # convert to table
-    dt = rbindlist(dt_list)
-    # replace NA with 0
-    dt[is.na(cts), cts := 0]
-    # read count for each sample minus the count for the clone
-    dt[, sms := total - cts + correct]
-    # add correction to counts to avoid 0
-    dt[ , cts := cts + correct]
-    #prepare ans as data.frame as we used in revious version
-    ans <- cbind(dt[[1]],dt[[4]])
-    colnames(ans) <- c("cts","sms")
-    rownames(ans) <- dt[[2]]
-    return(ans)
+    ans <- list_rbind(
+      map(countData,\(sc, sample){
+        cts <- sc[[clone]]
+        sms <- sum(sc)
+        data.frame(cts=cts, sms=sms)
+    }))
+    rownames(ans) <- names(countData)
+    ans$cts <- ifelse(is.na(ans$cts),0,ans$cts)
+    ans$sms <- ans$sms - ans$cts
+    ans <- ans + correct 
+    ans
 }
 
 #### function to make the data frame for regression
