@@ -110,7 +110,7 @@ cTabPR = function(clone, countData, correct = 1){
     rownames(ans) <- names(countData)
     ans$cts <- ifelse(is.na(ans$cts),0,ans$cts)
     ans$sms <- ans$sms - ans$cts
-    ans <- ans + correct 
+    ans <- ans + correct
     ans
 }
 
