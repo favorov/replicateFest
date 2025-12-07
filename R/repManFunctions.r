@@ -12,7 +12,7 @@
 #' @importFrom stats p.adjust setNames
 #' @importFrom pheatmap pheatmap
 #' @importFrom data.table data.table rbindlist
-#' @importFrom purrr map list_rbind
+#' @importFrom purrr map list_rbind 
 
 #' @export
 #' @param files a list of filenames with full paths
@@ -101,17 +101,18 @@ cTabPR = function(clone, countData, correct = 1){
     #  ans=cbind(cts,sms)+correct
     #
     # alternative implementation
-    ans <- list_rbind(
-      map(countData,\(sc, sample){
-        cts <- sc[[clone]]
-        sms <- sum(sc)
-        data.frame(cts=cts, sms=sms)
-    }))
+    ans <- as.data.frame(
+      rbindlist(
+        map(countData,\(sc, sample){
+          cts <- ifelse(is.na(sc[clone]),0,as.numeric(sc[clone]))
+          sms <- sum(sc) - cts
+          cts <- cts + correct
+          sms <- sms + correct
+          data.table(cts = cts, sms=sms)
+        })
+      )
+    )
     rownames(ans) <- names(countData)
-    ans$cts <- ifelse(is.na(ans$cts),0,ans$cts)
-    ans$sms <- ans$sms - ans$cts
-    ans <- ans + correct
-    ans
 }
 
 #### function to make the data frame for regression
