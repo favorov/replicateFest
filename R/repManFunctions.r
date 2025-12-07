@@ -12,7 +12,8 @@
 #' @importFrom stats p.adjust setNames
 #' @importFrom pheatmap pheatmap
 #' @importFrom data.table data.table rbindlist
-#' @importFrom purrr map list_rbind 
+#' @importFrom purrr map list_rbind
+#' @importFrom stringi stri_c
 
 #' @export
 #' @param files a list of filenames with full paths
@@ -112,7 +113,10 @@ cTabPR = function(clone, countData, correct = 1){
         })
       )
     )
-    rownames(ans) <- names(countData)
+    #repeat the naming scheme from commented code
+    #like "Blankson_NoPep_2.CAISESLGVSGANVLTF" 
+    rownames(ans) <- stringi::stri_c(names(countData),clone,sep=".")
+    ans
 }
 
 #### function to make the data frame for regression
