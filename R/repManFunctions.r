@@ -85,38 +85,35 @@ readMergeSave = function(files, filenames = NULL)
 ###### 1) countData=merged data from readMergeSave
 #### correct is a parameter to add to all counts to avoid 0s
 cTabPR = function(clone, countData, correct = 1){
-
     # # replace missing values with 0
     #  minna=function(x){  ### function to deal with missing values
     #     if(is.na(x)) x=0
     #     return(x)}
     #
     # # get counts for a clone across all samples
-    #  cts=sapply(countDat,function(x) return(x[clone]))
+    #  cts=sapply(countData,function(x) return(x[clone]))
     #
     #  # replace missing values with 0
     #  cts=sapply(cts,minna)
     #
     #  # get total read count for each sample minus the count for the clone
-    #  sms=sapply(countDat,sum)-cts
+    #  sms=sapply(countData,sum)-cts
     #  ans=cbind(cts,sms)+correct
     #
     # alternative implementation
-    ans <- as.data.frame(
-      rbindlist(
+    ans <- do.call(rbind,
         map(countData,\(sc, sample){
           cts <- ifelse(is.na(sc[clone]),0,as.numeric(sc[clone]))
           sms <- sum(sc) - cts
           cts <- cts + correct
           sms <- sms + correct
-          data.table(cts = cts, sms=sms)
+          c(cts = cts, sms=sms)
         })
       )
-    )
     #repeat the naming scheme from commented code
     #like "Blankson_NoPep_2.CAISESLGVSGANVLTF" 
     rownames(ans) <- stringi::stri_c(names(countData),clone,sep=".")
-    ans
+  ans
 }
 
 #### function to make the data frame for regression
