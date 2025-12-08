@@ -86,38 +86,40 @@ readMergeSave = function(files, filenames = NULL)
 #### correct is a parameter to add to all counts to avoid 0s
 cTabPR = function(clone, countData, correct = 1){
     # # replace missing values with 0
-    #  minna=function(x){  ### function to deal with missing values
-    #     if(is.na(x)) x=0
-    #     return(x)}
+    minna=function(x){  ### function to deal with missing values
+      if(is.na(x)) x=0
+      return(x)
+    }
     #
-    # # get counts for a clone across all samples
-    #  cts=sapply(countData,function(x) return(x[clone]))
+    # get counts for a clone across all samples
+    cts=sapply(countData,function(x) return(x[clone]))
     #
-    #  # replace missing values with 0
-    #  cts=sapply(cts,minna)
+    # replace missing values with 0
+    cts=sapply(cts,minna)
     #
-    #  # get total read count for each sample minus the count for the clone
-    #  sms=sapply(countData,sum)-cts
-    #  ans=cbind(cts,sms)+correct
+    # get total read count for each sample minus the count for the clone
+    sms=sapply(countData,sum)-cts
+    ans=cbind(cts,sms)+correct
     #
-    # alternative implementation
-    ans <- do.call(rbind,
-        map(countData,\(sc, sample){
-          if (is.na(sc[clone])) {
-            cts <- 0
-          } else {
-            cts <- as.numeric(sc[clone])
-          }
-          #cts <- ifelse(is.na(sc[clone]),0,as.numeric(sc[clone]))
-          sms <- sum(sc) - cts
-          cts <- cts + correct
-          sms <- sms + correct
-          c(cts = cts, sms=sms)
-        })
-      )
-    #repeat the naming scheme from commented code
-    #like "Blankson_NoPep_2.CAISESLGVSGANVLTF" 
-    rownames(ans) <- stringi::stri_c(names(countData),clone,sep=".")
+    # alternative implementation, tried to make it faster,
+    # it warks ok, but slower, alas
+    # ans <- do.call(rbind,
+    #   map(countData,\(sc, sample){
+    #      if (is.na(sc[clone])) {
+    #        cts <- 0
+    #      } else {
+    #        cts <- as.numeric(sc[clone])
+    #      }
+    #      #cts <- ifelse(is.na(sc[clone]),0,as.numeric(sc[clone]))
+    #      sms <- sum(sc) - cts
+    #      cts <- cts + correct
+    #      sms <- sms + correct
+    #      c(cts = cts, sms=sms)
+    #    })
+    #  )
+    # #repeat the naming scheme from commented code
+    # #like "Blankson_NoPep_2.CAISESLGVSGANVLTF" 
+    # rownames(ans) <- stringi::stri_c(names(countData),clone,sep=".")
   ans
 }
 
