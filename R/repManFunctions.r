@@ -14,7 +14,6 @@
 #' @importFrom data.table data.table rbindlist
 # #' @importFrom purrr map list_rbind
 # #' @importFrom stringi stri_c
-=======
 
 #' @export
 #' @param files a list of filenames with full paths
