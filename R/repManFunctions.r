@@ -14,6 +14,7 @@
 #' @importFrom data.table data.table rbindlist
 # #' @importFrom purrr map list_rbind
 # #' @importFrom stringi stri_c
+=======
 
 #' @export
 #' @param files a list of filenames with full paths
@@ -501,7 +502,6 @@ getClonesToTest = function(countDat, nReads = 50)
   # cts = unlist(sapply(countDat, function(x)  return(x)))
   # # get maximum count for each clone across all samples
   # maxCt = tapply(cts, clones, max)
-  
   # alternative faster implementation
   # create a data.table with all sampples, clones, and counts
   dt_list = lapply(names(countDat), function(samp){
