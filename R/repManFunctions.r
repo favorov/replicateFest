@@ -12,7 +12,7 @@
 #' @importFrom stats p.adjust setNames
 #' @importFrom pheatmap pheatmap
 #' @importFrom data.table data.table rbindlist
-#' @importFrom purrr map list_rbind
+# #' @importFrom purrr map list_rbind
 # #' @importFrom stringi stri_c
 
 #' @export
