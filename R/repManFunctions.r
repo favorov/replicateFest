@@ -103,7 +103,12 @@ cTabPR = function(clone, countData, correct = 1){
     # alternative implementation
     ans <- do.call(rbind,
         map(countData,\(sc, sample){
-          cts <- ifelse(is.na(sc[clone]),0,as.numeric(sc[clone]))
+          if (is.na(sc[clone])) {
+            cts <- 0
+          } else {
+            cts <- as.numeric(sc[clone])
+          }
+          #cts <- ifelse(is.na(sc[clone]),0,as.numeric(sc[clone]))
           sms <- sum(sc) - cts
           cts <- cts + correct
           sms <- sms + correct
